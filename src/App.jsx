@@ -7,7 +7,7 @@ import Footer from "./components/layouts/Footer";
 import Home from "./features/home/homePage";
 import AuthPage from "./features/auth/authPage";
 import ShopPage from "./features/shop/shop";
-import AtelierPage from "./features/atelier/atelierPage";
+import AtelierPage from "./features/atelier/AtelierPage";
 import HeritagePage from "./features/heritage/heritagePage";
 import SearchPage from "./features/search/searchPage";
 import CarePage from "./features/care/carePage";

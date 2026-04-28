@@ -4,8 +4,7 @@
 
 @font-face {
   font-family: "TanAngleton";
-  src: url("/src/assets/fonts/TanAngleton-Regular.woff2") format("woff2"),
-       url("/src/assets/fonts/TanAngleton-Regular.woff") format("woff");
+  src: url("/src/assets/fonts/TanAngleton-Regular.woff2") format("woff2");
   font-weight: normal;
   font-style: normal;
 }

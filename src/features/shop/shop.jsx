@@ -1,179 +1,513 @@
-import React, { useState } from "react";
-import ProductCard from "../../components/common/card";
+// =======================================================
+// src/features/shop/shop.jsx
+// FINAL SHOP PAGE (Premium Fixed Version)
+// =======================================================
 
-import one from "../../assets/one.jpeg";
-import two from "../../assets/two.jpeg";
-import three from "../../assets/three.jpeg";
+import React, { useEffect, useMemo, useState , useRef} from "react";
 import { NavLink } from "react-router-dom";
-
-const allProducts = [
-    {
-        id: 1,
-        image: one,
-        title: "Pashmina",
-        category: "Classic",
-        price: "₹18,500",
-        description:
-            "Made from rare Changthangi wool with feather-light softness and warmth.",
-    },
-    {
-        id: 2,
-        image: two,
-        title: "Jamawar",
-        category: "Royal",
-        price: "₹24,000",
-        description:
-            "Intricate woven floral artistry inspired by regal Kashmiri heritage.",
-    },
-    {
-        id: 3,
-        image: three,
-        title: "Kani",
-        category: "Limited",
-        price: "₹29,500",
-        description:
-            "Handwoven using traditional wooden sticks known as kanis.",
-    },
-    {
-        id: 4,
-        image: one,
-        title: "Noor Cashmere",
-        category: "Classic",
-        price: "₹16,900",
-        description:
-            "Understated elegance with timeless texture and soft drape.",
-    },
-    {
-        id: 5,
-        image: two,
-        title: "Royal Paisley",
-        category: "Royal",
-        price: "₹32,000",
-        description:
-            "Luxurious detailing crafted for statement sophistication.",
-    },
-    {
-        id: 6,
-        image: three,
-        title: "Artisan Legacy",
-        category: "Limited",
-        price: "₹36,500",
-        description:
-            "A collector’s piece woven in limited artisan production.",
-    },
-];
+import ProductCard from "../../components/common/card";
+import { getAllProducts } from "./shopService";
 
 function ShopPage() {
-    const [activeFilter, setActiveFilter] = useState("All");
+  const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
 
-    const filters = ["All", "Classic", "Royal", "Limited"];
+  const [activeFilter, setActiveFilter] = useState("All");
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState("default");
 
-    const filteredProducts =
-        activeFilter === "All"
-            ? allProducts
-            : allProducts.filter(
-                (item) => item.category === activeFilter
-            );
+  const [loading, setLoading] = useState(true);
 
-    return (
-        <div className="bg-[#F2F0EF] min-h-screen pt-32">
-            {/* Hero */}
-            <section className="max-w-7xl mx-auto px-6 pb-20">
-                <p className="text-xs uppercase tracking-[0.35em] text-[#1C2120]/55 mb-4"
-                style={{ fontFamily: "Cardo, serif" }}>
-                    Bivela House
-                </p>
+  const [open, setOpen] = useState(false);
+const dropdownRef = useRef(null);
 
-                <h1
-                    className="text-5xl md:text-7xl text-[#1C2120] leading-tight"
-                    style={{ fontFamily: "TanAngleton, serif" }}
-                >
-                    The Collection
-                </h1>
+useEffect(() => {
+  const handleClickOutside = (e) => {
+    if (
+      dropdownRef.current &&
+      !dropdownRef.current.contains(e.target)
+    ) {
+      setOpen(false);
+    }
+  };
 
-                <p className="mt-8 max-w-2xl text-[#1C2120]/70 leading-8"
-                style={{ fontFamily: "Cardo, serif" }}>
-                    Discover heirloom shawls shaped through heritage,
-                    craftsmanship, and timeless luxury. Each piece is
-                    designed to be treasured for generations.
-                </p>
-            </section>
+  document.addEventListener("mousedown", handleClickOutside);
 
-            {/* Filters */}
-            <section className="max-w-7xl mx-auto px-6 pb-16">
-                <div className="flex flex-wrap gap-4 border-y border-black/10 py-6">
-                    {filters.map((item) => (
-                        <button
-                            key={item}
-                            onClick={() => setActiveFilter(item)}
-                            className={`px-5 py-2 text-xs uppercase tracking-[0.30em] transition duration-300 border ${activeFilter === item
-                                    ? "bg-[#1C2120] text-[#F2F0EF] border-[#1C2120]"
-                                    : "border-black/15 text-[#1C2120] hover:bg-[#1C2120] hover:text-[#F2F0EF]"
-                                }`}
-                        >
-                            {item}
-                        </button>
-                    ))}
-                </div>
-            </section>
-
-            {/* Products */}
-            <section className="max-w-7xl mx-auto px-6 pb-24 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-14">
-                {filteredProducts.map((item) => (
-                    <div key={item.id}>
-                        <ProductCard
-                            id={item.id}
-                            image={item.image}
-                            title={item.title}
-                            description={item.description}
-                        />
-
-                        <div className="mt-4 flex items-center justify-between">
-                            <p className="text-xs uppercase tracking-[0.25em] text-[#1C2120]/55">
-                                {item.category}
-                            </p>
-
-                            <p className="text-sm text-[#1C2120]">
-                                {item.price}
-                            </p>
-                        </div>
-                    </div>
-                ))}
-            </section>
-
-            {/* Editorial Section */}
-            <section className="border-t border-black/10">
-                <div className="max-w-7xl mx-auto px-6 py-24 text-center">
-                    <p className="text-xs uppercase tracking-[0.35em] text-[#1C2120]/55 mb-5"
-                    style={{ fontFamily: "Cardo, serif" }}>
-                        Private Atelier
-                    </p>
-
-                    <h2
-                        className="text-4xl md:text-6xl text-[#1C2120]"
-                        style={{ fontFamily: "TanAngleton, serif" }}
-                    >
-                        Design What Does
-                        <br />
-                        Not Yet Exist
-                    </h2>
-
-                    <p className="mt-8 max-w-2xl mx-auto text-[#1C2120]/70 leading-8"
-                    style={{ fontFamily: "Cardo, serif" }}>
-                        Personalize threads, patterns, and embroidery in
-                        your own Bivela masterpiece.
-                    </p>
-
-                    <NavLink
-                        to="/atelier"
-                        className="inline-block mt-10 border border-[#1C2120] px-8 py-3 text-xs uppercase tracking-[0.30em] hover:bg-[#1C2120] hover:text-[#F2F0EF] transition"
-                   style={{ fontFamily: "Cardo, serif" }} >
-                        Enter Atelier
-                    </NavLink>
-                </div>
-            </section>
-        </div>
+  return () =>
+    document.removeEventListener(
+      "mousedown",
+      handleClickOutside
     );
+}, []);
+
+  // ===================================================
+  // FETCH PRODUCTS
+  // ===================================================
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+
+      const data = await getAllProducts();
+
+      const safeData = Array.isArray(data)
+        ? data
+        : [];
+
+      setProducts(safeData);
+      setFilteredProducts(safeData);
+    } catch (error) {
+      console.log(
+        "Product Fetch Error:",
+        error
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  // ===================================================
+  // FILTER + SEARCH + SORT
+  // ===================================================
+  useEffect(() => {
+    let result = [...products];
+
+    // Category Filter
+    if (activeFilter !== "All") {
+      result = result.filter(
+        (item) =>
+          item.category?.name ===
+          activeFilter
+      );
+    }
+
+    // Search
+    if (search.trim()) {
+      result = result.filter((item) =>
+        item.name
+          ?.toLowerCase()
+          .includes(
+            search.toLowerCase()
+          )
+      );
+    }
+
+    // Sort
+    if (sortBy === "low-high") {
+      result.sort(
+        (a, b) =>
+          Number(a.basePrice || 0) -
+          Number(b.basePrice || 0)
+      );
+    }
+
+    if (sortBy === "high-low") {
+      result.sort(
+        (a, b) =>
+          Number(b.basePrice || 0) -
+          Number(a.basePrice || 0)
+      );
+    }
+
+    if (sortBy === "rating") {
+      result.sort((a, b) => {
+        const aRating =
+          a.reviews?.length > 0
+            ? a.reviews.reduce(
+                (sum, r) =>
+                  sum + r.rating,
+                0
+              ) /
+              a.reviews.length
+            : 0;
+
+        const bRating =
+          b.reviews?.length > 0
+            ? b.reviews.reduce(
+                (sum, r) =>
+                  sum + r.rating,
+                0
+              ) /
+              b.reviews.length
+            : 0;
+
+        return bRating - aRating;
+      });
+    }
+
+    setFilteredProducts(result);
+  }, [
+    products,
+    activeFilter,
+    search,
+    sortBy,
+  ]);
+
+  // ===================================================
+  // STATS
+  // ===================================================
+  const totalProducts =
+    filteredProducts.length;
+
+  const avgPrice = useMemo(() => {
+    if (!filteredProducts.length)
+      return 0;
+
+    const total =
+      filteredProducts.reduce(
+        (sum, item) =>
+          sum +
+          Number(
+            item.basePrice || 0
+          ),
+        0
+      );
+
+    return Math.round(
+      total /
+        filteredProducts.length
+    );
+  }, [filteredProducts]);
+
+  return (
+    <div className="bg-[#F2F0EF] min-h-screen pt-32">
+      {/* HERO */}
+      <section className="max-w-7xl mx-auto px-6 pb-20">
+        <p className="text-xs uppercase tracking-[0.35em] text-black/50 mb-4">
+          Bivela House
+        </p>
+
+        <h1 className="text-5xl md:text-7xl text-black leading-tight">
+          The Collection
+        </h1>
+
+        <p className="mt-8 max-w-2xl text-black/70 leading-8">
+          Discover heirloom shawls
+          shaped through heritage,
+          craftsmanship, and timeless
+          luxury.
+        </p>
+      </section>
+
+      {/* CONTROLS */}
+      <section className="max-w-7xl mx-auto px-6 pb-10">
+        <div className="grid md:grid-cols-3 gap-4">
+          {/* Search */}
+          <input
+            type="text"
+            placeholder="Search Collection..."
+            value={search}
+            onChange={(e) =>
+              setSearch(
+                e.target.value
+              )
+            }
+            className="border border-black/15 px-4 py-3 bg-white text-black placeholder:text-black/40 outline-none focus:outline-none focus:ring-0 focus:border-black"
+          />
+
+          {/* Premium Dropdown */}
+        <div ref={dropdownRef} className="relative w-full">
+
+  {/* BUTTON */}
+  <button
+    type="button"
+    onClick={() => setOpen(!open)}
+    className="w-full flex justify-between items-center border border-black/15 bg-white text-black px-4 py-3 hover:bg-black hover:text-white transition"
+  >
+    <span>
+      {sortBy === "default" && "Sort By"}
+      {sortBy === "low-high" && "Price: Low to High"}
+      {sortBy === "high-low" && "Price: High to Low"}
+      {sortBy === "rating" && "Highest Rated"}
+    </span>
+
+    <span className="text-xs">▼</span>
+  </button>
+
+  {/* DROPDOWN */}
+  {open && (
+    <div className="absolute z-50 mt-2 w-full bg-white border border-black overflow-hidden">
+
+      {[
+        { label: "Sort By", value: "default" },
+        { label: "Price: Low to High", value: "low-high" },
+        { label: "Price: High to Low", value: "high-low" },
+        { label: "Highest Rated", value: "rating" },
+      ].map((opt) => {
+        const active = sortBy === opt.value;
+
+        return (
+          <button
+            key={opt.value}
+            onClick={() => {
+              setSortBy(opt.value);
+              setOpen(false);
+            }}
+            className={`w-full px-4 py-3 text-left text-sm transition ${
+              active
+                ? "bg-black text-white"
+                : "hover:bg-black hover:text-white"
+            }`}
+          >
+            {opt.label}
+          </button>
+        );
+      })}
+
+    </div>
+  )}
+</div>
+
+          {/* Stats */}
+          <div className="border border-black/15 bg-white px-4 py-3 text-sm flex items-center justify-between">
+            <span>
+              {totalProducts} Items
+            </span>
+
+            <span>
+              Avg ₹{avgPrice}
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* CATEGORY FILTER */}
+      <section className="max-w-7xl mx-auto px-6 pb-16">
+        <div className="flex flex-wrap gap-4 border-y border-black/10 py-6">
+          {[
+            "All",
+            "Shawls",
+            "Scarves",
+          ].map((item) => (
+            <button
+              key={item}
+              onClick={() =>
+                setActiveFilter(item)
+              }
+              className={`px-5 py-3 text-xs uppercase tracking-[0.30em] border transition ${
+                activeFilter === item
+                  ? "bg-black text-white border-black"
+                  : "bg-white border-black/10 hover:bg-black hover:text-white"
+              }`}
+            >
+              {item}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* PRODUCTS */}
+      <section className="max-w-7xl mx-auto px-6 pb-24 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+        {loading ? (
+          <p className="text-lg">
+            Loading Products...
+          </p>
+        ) : filteredProducts.length ===
+          0 ? (
+          <p>
+            No Products Found
+          </p>
+        ) : (
+          filteredProducts.map(
+            (item) => {
+              const primaryImage =
+                item.images?.find(
+                  (img) =>
+                    img.isPrimary
+                )?.imageUrl ||
+                item.images?.[0]
+                  ?.imageUrl;
+
+              const totalStock =
+                item.variants?.reduce(
+                  (
+                    sum,
+                    v
+                  ) =>
+                    sum +
+                    Number(
+                      v.stock ||
+                        0
+                    ),
+                  0
+                ) || 0;
+
+              const avgRating =
+                item.reviews
+                  ?.length > 0
+                  ? (
+                      item.reviews.reduce(
+                        (
+                          sum,
+                          r
+                        ) =>
+                          sum +
+                          r.rating,
+                        0
+                      ) /
+                      item
+                        .reviews
+                        .length
+                    ).toFixed(
+                      1
+                    )
+                  : "0";
+
+              return (
+                <div
+                  key={item.id}
+                  className="bg-white p-4 shadow-sm hover:shadow-xl transition duration-300"
+                >
+                  <ProductCard
+                    id={item.id}
+                    image={
+                      primaryImage
+                    }
+                    title={
+                      item.name
+                    }
+                    description={
+                      item.description
+                    }
+                  />
+
+                  <div className="mt-4 space-y-2">
+                    {/* Top Row */}
+                    <div className="flex justify-between">
+                      <p className="text-xs uppercase tracking-[0.25em] text-black/55">
+                        {
+                          item
+                            .category
+                            ?.name
+                        }
+                      </p>
+
+                      <p className="font-medium">
+                        ₹
+                        {
+                          item.basePrice
+                        }
+                      </p>
+                    </div>
+
+                    {/* Desc */}
+                    <p className="text-sm text-black/70 line-clamp-2">
+                      {
+                        item.description
+                      }
+                    </p>
+
+                    {/* Sizes */}
+                    <p className="text-sm text-black/60">
+                      Sizes:{" "}
+                      {item.variants
+                        ?.map(
+                          (
+                            v
+                          ) =>
+                            v.size
+                        )
+                        .join(
+                          ", "
+                        ) ||
+                        "N/A"}
+                    </p>
+
+                    {/* Colors */}
+                    <p className="text-sm text-black/60">
+                      Colors:{" "}
+                      {item.variants
+                        ?.map(
+                          (
+                            v
+                          ) =>
+                            v.color
+                        )
+                        .join(
+                          ", "
+                        ) ||
+                        "N/A"}
+                    </p>
+
+                    {/* Stock */}
+                    <p className="text-sm">
+                      Stock:{" "}
+                      <span
+                        className={
+                          totalStock >
+                          0
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }
+                      >
+                        {totalStock >
+                        0
+                          ? `${totalStock} Available`
+                          : "Out of Stock"}
+                      </span>
+                    </p>
+
+                    {/* Rating */}
+                    <p className="text-sm text-yellow-600">
+                      ⭐{" "}
+                      {
+                        avgRating
+                      }{" "}
+                      (
+                      {item
+                        .reviews
+                        ?.length ||
+                        0}
+                      )
+                    </p>
+
+                    {/* CTA */}
+                    <NavLink
+                      to={`/product/${item.id}`}
+                      className="block text-center mt-4 border border-black px-4 py-3 text-xs uppercase tracking-[0.25em] hover:bg-black hover:text-white transition"
+                    >
+                      Explore
+                    </NavLink>
+                  </div>
+                </div>
+              );
+            }
+          )
+        )}
+      </section>
+
+      {/* EDITORIAL */}
+      <section className="border-t border-black/10">
+        <div className="max-w-7xl mx-auto px-6 py-24 text-center">
+          <p className="text-xs uppercase tracking-[0.35em] text-black/50 mb-5">
+            Private Atelier
+          </p>
+
+          <h2 className="text-4xl md:text-6xl text-black leading-tight">
+            Design What Does
+            <br />
+            Not Yet Exist
+          </h2>
+
+          <p className="mt-8 max-w-2xl mx-auto text-black/70 leading-8">
+            Personalize threads,
+            patterns, and embroidery
+            in your own masterpiece.
+          </p>
+
+          <NavLink
+            to="/atelier"
+            className="inline-block mt-10 border border-black px-8 py-3 text-xs uppercase tracking-[0.30em] hover:bg-black hover:text-white transition"
+          >
+            Enter Atelier
+          </NavLink>
+        </div>
+      </section>
+    </div>
+  );
 }
 
 export default ShopPage;

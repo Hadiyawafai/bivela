@@ -55,12 +55,13 @@ function Home() {
 
         <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
           <div className="text-center px-6 max-w-5xl">
-            <p
-              className="text-[#F2F0EF] text-xs md:text-sm uppercase tracking-[0.45em] mb-6"
-              style={{ fontFamily: "Cardo, serif" }}
-            >
-              House Of Bivela
-            </p>
+  <p
+    className="text-[#F2F0EF] text-xs md:text-sm uppercase tracking-[0.45em] mb-6 mt-5"
+    style={{ fontFamily: "Cardo, serif" }}
+  >
+    House Of Bivela
+  </p>
+
 
             <h1
               className="text-[#F2F0EF] text-4xl md:text-7xl leading-tight"

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import SignIn from "./signin";
-import SignUp from "./signup";
-import ForgotPassword from "./forgotpassword";
+import SignIn from "./SignIn";
+import SignUp from "./SignUp";
+import ForgotPassword from "./ForgotPassword";
 
 export default function AuthPage() {
   const [mode, setMode] = useState("signin");

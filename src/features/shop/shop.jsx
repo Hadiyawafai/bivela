@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import ProductCard from "../../components/common/card";
+import ProductCard from "../../components/common/Card";
 
 import one from "../../assets/one.jpeg";
 import two from "../../assets/two.jpeg";

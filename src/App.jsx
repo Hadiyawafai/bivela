@@ -4,14 +4,14 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navbar from "./components/layouts/Navbar";
 import Footer from "./components/layouts/Footer";
 
-import Home from "./features/home/homePage";
-import AuthPage from "./features/auth/authPage";
-import ShopPage from "./features/shop/shop";
+import Home from "./features/home/HomePage";
+import AuthPage from "./features/auth/AuthPage";
+import ShopPage from "./features/shop/Shop";
 import AtelierPage from "./features/atelier/AtelierPage";
-import HeritagePage from "./features/heritage/heritagePage";
-import SearchPage from "./features/search/searchPage";
-import CarePage from "./features/care/carePage";
-import CartPage from "./features/cart/cartPage";
+import HeritagePage from "./features/heritage/HeritagePage";
+import SearchPage from "./features/search/SearchPage";
+import CarePage from "./features/care/CarePage";
+import CartPage from "./features/cart/CartPage";
 
 function App() {
   return (

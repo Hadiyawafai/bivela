@@ -12,6 +12,8 @@ import HeritagePage from "./features/heritage/heritagePage";
 import SearchPage from "./features/search/searchPage";
 import CarePage from "./features/care/carePage";
 import CartPage from "./features/cart/cartPage";
+import AdminProducts from "./features/shop/adminProducts";
+import AdminDashboard from "./features/admin/adminDashboard";
 
 function App() {
   return (
@@ -35,6 +37,8 @@ function App() {
           <Route path="/care" element={<CarePage />} />
           <Route path="/search" element={<SearchPage/>} />
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/admin/products" element={<AdminProducts />} />
+          <Route path="/admin/*" element={<AdminDashboard />} />
         </Routes>
       </main>
 

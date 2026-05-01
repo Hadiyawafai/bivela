@@ -1,169 +1,260 @@
-// =======================================================
-// src/features/shop/productForm.jsx
-// BEAUTIFIED + PRODUCTION READY
-// =======================================================
-
 import React, { useEffect, useState } from "react";
-import { createProduct, updateProduct } from "./shopService";
+import {
+  createProduct,
+  updateProduct,
+  deleteProduct,
+} from "./shopService";
 import { getAllCategories } from "../category/categoryService";
 
-export default function ProductForm({ onClose, onSuccess, editData }) {
+export default function ProductForm({
+  onClose,
+  onSuccess,
+  editData,
+}) {
+  const isEdit = !!editData;
+
   const [form, setForm] = useState({
-    name: editData?.name || "",
-    description: editData?.description || "",
-    basePrice: editData?.basePrice || "",
-    categoryId: editData?.category?.id || "",
-    isActive: editData?.isActive ?? true,
+    name: "",
+    description: "",
+    basePrice: "",
+    categoryId: "",
   });
 
   const [categories, setCategories] = useState([]);
   const [openCat, setOpenCat] = useState(false);
-
-  const [variants, setVariants] = useState(
-    editData?.variants || [
-      { sku: "", size: "", color: "", price: "", stock: "" },
-    ]
-  );
-
-  const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  /* ================= FETCH CATEGORIES ================= */
+  const [variants, setVariants] = useState([
+    { size: "", color: "", price: "", stock: "" },
+  ]);
+
+  const [images, setImages] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);
+
+  // ======================================
+  // LOAD EDIT DATA
+  // ======================================
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const res = await getAllCategories();
+    if (editData) {
+      setForm({
+        name: editData.name || "",
+        description: editData.description || "",
+        basePrice: editData.basePrice || "",
+        categoryId: editData.category?.id || "",
+      });
 
-        const data =
-          res?.data?.data ||
-          res?.data?.categories ||
-          res?.data ||
-          [];
+      setVariants(
+        editData.variants?.length
+          ? editData.variants.map((v) => ({
+              size: v.size || "",
+              color: v.color || "",
+              price: v.price || "",
+              stock: v.stock || "",
+            }))
+          : [{ size: "", color: "", price: "", stock: "" }]
+      );
 
-        setCategories(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error(err);
-        setCategories([]);
-      }
+      setExistingImages(editData.images || []);
+    }
+  }, [editData]);
+
+  // ======================================
+  // FETCH CATEGORIES
+  // ======================================
+  useEffect(() => {
+    const fetch = async () => {
+      const res = await getAllCategories();
+      setCategories(Array.isArray(res) ? res : res.data);
     };
 
-    fetchCategories();
+    fetch();
   }, []);
 
-  /* ================= VARIANTS ================= */
+  // ======================================
+  // VARIANTS
+  // ======================================
   const updateVariant = (i, field, value) => {
     const copy = [...variants];
     copy[i][field] = value;
     setVariants(copy);
   };
 
-  const addVariant = () =>
+  const addVariant = () => {
     setVariants([
       ...variants,
-      { sku: "", size: "", color: "", price: "", stock: "" },
+      { size: "", color: "", price: "", stock: "" },
     ]);
+  };
 
-  const removeVariant = (i) =>
+  const removeVariant = (i) => {
     setVariants(variants.filter((_, idx) => idx !== i));
+  };
 
-  /* ================= SUBMIT ================= */
+  // ======================================
+  // SUBMIT (FINAL FIXED)
+  // ======================================
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
       const payload = {
-        name: form.name,
-        description: form.description,
+        name: form.name.trim(),
+        description: form.description.trim(),
         basePrice: Number(form.basePrice),
         categoryId: Number(form.categoryId),
-        isActive: form.isActive,
 
+        // no id sent (fixes backend 500)
         variants: variants.map((v) => ({
-          sku: v.sku,
-          size: v.size,
-          color: v.color,
+          size: v.size.trim(),
+          color: v.color.trim(),
           price: Number(v.price),
           stock: Number(v.stock),
         })),
       };
 
-      if (editData) {
-        await updateProduct(editData.id, payload, images);
+      if (isEdit) {
+        await updateProduct(
+          editData.id,
+          payload,
+          images
+        );
       } else {
-        await createProduct(payload, images);
+        await createProduct(
+          payload,
+          images
+        );
       }
 
       onSuccess();
     } catch (err) {
       console.error(err);
-      alert("Failed to save product");
+      alert(
+        err?.response?.data?.message ||
+          "Failed to save product"
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const selectedCategory = (categories || []).find(
+  // ======================================
+  // DELETE
+  // ======================================
+  const handleDelete = async () => {
+    if (!window.confirm("Delete this product?")) return;
+
+    try {
+      await deleteProduct(editData.id);
+      onSuccess();
+    } catch (err) {
+      alert("Delete failed");
+    }
+  };
+
+  const selectedCategory = categories.find(
     (c) => c.id === Number(form.categoryId)
   );
 
   return (
-    <div className="fixed inset-0 z-[60] bg-[#F2F0EF] flex justify-center">
-      <div className="w-full max-w-4xl px-4 py-5 overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-[#F2F0EF] flex justify-center items-start pt-5 px-4">
+      <div className="w-full max-w-5xl bg-white rounded-[28px] shadow-2xl border border-black/10 overflow-hidden">
 
         {/* HEADER */}
-        <div className="flex justify-between mb-3">
-          <h2 className="text-3xl font-serif">
-            {editData ? "Edit Product" : "Add Product"}
+        <div className="px-6 py-4 border-b flex justify-between items-center">
+          <h2 className="text-2xl font-serif tracking-wide">
+            {isEdit ? "Edit Product" : "Add Product"}
           </h2>
-          <button onClick={onClose} className="text-2xl">✕</button>
+
+          <button
+            onClick={onClose}
+            className="w-9 h-9 rounded-full border hover:bg-black hover:text-white transition"
+          >
+            ✕
+          </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3">
+        {/* FORM */}
+        <form
+          onSubmit={handleSubmit}
+          className="px-6 py-5 max-h-[84vh] overflow-y-auto space-y-5"
+        >
 
-          {/* GRID */}
-          <div className="grid md:grid-cols-2 gap-3">
+          {/* TOP */}
+          <div className="grid grid-cols-4 gap-4">
 
-            <Input
-              label="Product Name"
-              placeholder="e.g. Luxury Kashmiri Shawl"
-              value={form.name}
-              onChange={(e) =>
-                setForm({ ...form, name: e.target.value })
-              }
-            />
+            {/* NAME */}
+            <div className="col-span-2">
+              <label className="text-sm font-medium mb-1 block">
+                Product Name
+              </label>
 
-            <Input
-              label="Base Price"
-              type="number"
-              placeholder="e.g. 25000"
-              value={form.basePrice}
-              onChange={(e) =>
-                setForm({ ...form, basePrice: e.target.value })
-              }
-            />
+              <input
+                placeholder="Luxury Shawl"
+                value={form.name}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    name: e.target.value,
+                  })
+                }
+                className="w-full border rounded-xl px-4 py-3"
+              />
+            </div>
+
+            {/* PRICE */}
+            <div>
+              <label className="text-sm font-medium mb-1 block">
+                Base Price
+              </label>
+
+              <input
+                type="number"
+                placeholder="4999"
+                value={form.basePrice}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    basePrice: e.target.value,
+                  })
+                }
+                className="w-full border rounded-xl px-4 py-3"
+              />
+            </div>
 
             {/* CATEGORY */}
             <div className="relative">
-              <label className="text-sm">Category</label>
+              <label className="text-sm font-medium mb-1 block">
+                Category
+              </label>
 
               <div
                 onClick={() => setOpenCat(!openCat)}
-                className="w-full bg-white border px-3 py-2 mt-1 cursor-pointer"
+                className="border rounded-xl px-4 py-3 cursor-pointer flex justify-between"
               >
-                {selectedCategory?.name || "Select Category"}
+                <span>
+                  {selectedCategory?.name ||
+                    "Select"}
+                </span>
+
+                <span>
+                  {openCat ? "▲" : "▼"}
+                </span>
               </div>
 
               {openCat && (
-                <div className="absolute w-full bg-white border mt-1 max-h-40 overflow-y-auto z-20">
+                <div className="absolute top-full left-0 w-full bg-white border rounded-xl shadow-xl mt-1 z-20">
                   {categories.map((cat) => (
                     <div
                       key={cat.id}
                       onClick={() => {
-                        setForm({ ...form, categoryId: cat.id });
+                        setForm({
+                          ...form,
+                          categoryId: cat.id,
+                        });
                         setOpenCat(false);
                       }}
-                      className="px-3 py-2 hover:bg-black hover:text-white cursor-pointer"
+                      className="px-4 py-3 hover:bg-black hover:text-white cursor-pointer"
                     >
                       {cat.name}
                     </div>
@@ -171,138 +262,209 @@ export default function ProductForm({ onClose, onSuccess, editData }) {
                 </div>
               )}
             </div>
-
-            {/* ACTIVE */}
-            <div className="flex items-center gap-2 mt-6">
-              <input
-                type="checkbox"
-                checked={form.isActive}
-                onChange={(e) =>
-                  setForm({ ...form, isActive: e.target.checked })
-                }
-              />
-              <label className="text-sm">Active Product</label>
-            </div>
           </div>
 
-          {/* DESCRIPTION */}
-          <Textarea
-            label="Description"
-            placeholder="Write detailed product description..."
-            value={form.description}
-            onChange={(e) =>
-              setForm({ ...form, description: e.target.value })
-            }
-          />
+          {/* EXISTING IMAGES */}
+          {isEdit &&
+            existingImages.length > 0 && (
+              <div>
+                <label className="text-sm font-medium mb-2 block">
+                  Existing Images
+                </label>
+
+                <div className="flex gap-2 flex-wrap">
+                  {existingImages.map(
+                    (img, i) => (
+                      <img
+                        key={i}
+                        src={img.imageUrl}
+                        alt=""
+                        className="w-14 h-14 rounded-xl object-cover border"
+                      />
+                    )
+                  )}
+                </div>
+              </div>
+            )}
 
           {/* VARIANTS */}
-          <div className="space-y-2">
-            {variants.map((v, i) => (
-              <div
-                key={i}
-                className="grid grid-cols-5 gap-2 bg-white p-2"
+          <div>
+            <div className="flex justify-between items-center mb-3">
+              <label className="text-sm font-medium">
+                Variants
+              </label>
+
+              <button
+                type="button"
+                onClick={addVariant}
+                className="border px-3 py-2 rounded-xl text-sm hover:bg-black hover:text-white"
               >
-                <InputSmall
-                  placeholder="SKU"
-                  value={v.sku}
-                  onChange={(e) =>
-                    updateVariant(i, "sku", e.target.value)
-                  }
-                />
-                <InputSmall
-                  placeholder="Size"
-                  value={v.size}
-                  onChange={(e) =>
-                    updateVariant(i, "size", e.target.value)
-                  }
-                />
-                <InputSmall
-                  placeholder="Color"
-                  value={v.color}
-                  onChange={(e) =>
-                    updateVariant(i, "color", e.target.value)
-                  }
-                />
-                <InputSmall
-                  type="number"
-                  placeholder="Price"
-                  value={v.price}
-                  onChange={(e) =>
-                    updateVariant(i, "price", e.target.value)
-                  }
-                />
-                <div className="flex gap-1">
-                  <InputSmall
+                + Add
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              {variants.map((v, i) => (
+                <div
+                  key={i}
+                  className="grid grid-cols-5 gap-2"
+                >
+                  <input
+                    placeholder="Size"
+                    value={v.size}
+                    onChange={(e) =>
+                      updateVariant(
+                        i,
+                        "size",
+                        e.target.value
+                      )
+                    }
+                    className="border rounded-xl px-3 py-2"
+                  />
+
+                  <input
+                    placeholder="Color"
+                    value={v.color}
+                    onChange={(e) =>
+                      updateVariant(
+                        i,
+                        "color",
+                        e.target.value
+                      )
+                    }
+                    className="border rounded-xl px-3 py-2"
+                  />
+
+                  <input
+                    type="number"
+                    placeholder="Price"
+                    value={v.price}
+                    onChange={(e) =>
+                      updateVariant(
+                        i,
+                        "price",
+                        e.target.value
+                      )
+                    }
+                    className="border rounded-xl px-3 py-2"
+                  />
+
+                  <input
                     type="number"
                     placeholder="Stock"
                     value={v.stock}
                     onChange={(e) =>
-                      updateVariant(i, "stock", e.target.value)
+                      updateVariant(
+                        i,
+                        "stock",
+                        e.target.value
+                      )
                     }
+                    className="border rounded-xl px-3 py-2"
                   />
 
-                  {variants.length > 1 && (
+                  {variants.length > 1 ? (
                     <button
                       type="button"
-                      onClick={() => removeVariant(i)}
-                      className="text-red-500 text-xs"
+                      onClick={() =>
+                        removeVariant(i)
+                      }
+                      className="border border-red-500 text-red-500 rounded-xl hover:bg-red-500 hover:text-white"
                     >
-                      X
+                      Remove
                     </button>
+                  ) : (
+                    <div />
                   )}
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
-          <button
-            type="button"
-            onClick={addVariant}
-            className="text-sm border px-3 py-1"
-          >
-            + Add Variant
-          </button>
+          {/* BOTTOM */}
+          <div className="grid grid-cols-3 gap-4">
 
-          {/* IMAGES */}
-          <input
-            type="file"
-            multiple
-            onChange={(e) => setImages([...e.target.files])}
-          />
+            {/* DESCRIPTION */}
+            <div className="col-span-2">
+              <label className="text-sm font-medium mb-1 block">
+                Description
+              </label>
 
-          {/* SUBMIT */}
-          <button
-            disabled={loading}
-            className="w-full bg-black text-white py-3"
-          >
-            {loading ? "Saving..." : editData ? "Update" : "Create"}
-          </button>
+              <textarea
+                rows="4"
+                placeholder="Premium handcrafted luxury product..."
+                value={form.description}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    description:
+                      e.target.value,
+                  })
+                }
+                className="w-full border rounded-2xl px-4 py-3 resize-none outline-none"
+              />
+            </div>
+
+            {/* UPLOAD */}
+            <div>
+              <label className="text-sm font-medium mb-1 block">
+                Upload Photos
+              </label>
+
+              <div className="border rounded-2xl px-4 py-3 min-h-[118px] bg-white">
+
+                <input
+                  type="file"
+                  multiple
+                  onChange={(e) =>
+                    setImages([
+                      ...e.target.files,
+                    ])
+                  }
+                  className="text-sm cursor-pointer file:border-0 file:bg-transparent file:text-black file:p-0 file:mr-2 outline-none"
+                />
+
+                {images.length > 0 && (
+                  <p className="text-xs text-gray-500 mt-2">
+                    {
+                      images.length
+                    }{" "}
+                    file(s) selected
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* FOOTER */}
+          <div className="grid grid-cols-2 gap-4">
+
+            {isEdit ? (
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="border border-red-500 text-red-500 py-3 rounded-2xl hover:bg-red-500 hover:text-white"
+              >
+                Delete Product
+              </button>
+            ) : (
+              <div />
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-black text-white py-3 rounded-2xl"
+            >
+              {loading
+                ? "Saving..."
+                : isEdit
+                ? "Save Changes"
+                : "Create Product"}
+            </button>
+          </div>
         </form>
       </div>
-    </div>
-  );
-}
-
-/* ================= INPUTS ================= */
-
-function Input({ label, ...props }) {
-  return (
-    <div>
-      <label className="text-sm">{label}</label>
-      <input {...props} className="w-full border px-3 py-2 mt-1" />
-    </div>
-  );
-}
-
-function InputSmall(props) {
-  return <input {...props} className="border px-2 py-1 text-sm w-full" />;
-}
-
-function Textarea({ label, ...props }) {
-  return (
-    <div>
-      <label className="text-sm">{label}</label>
-      <textarea {...props} className="w-full border p-2 mt-1" />
     </div>
   );
 }

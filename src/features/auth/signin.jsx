@@ -163,7 +163,7 @@ export default function SignIn({ setMode }) {
       >
         {/* USERNAME */}
         <div>
-          <label className="block text-sm mb-1">
+          <label className="block text-sm mb-1 text-[#1C2120]">
             Username or Email
           </label>
 
@@ -194,7 +194,7 @@ export default function SignIn({ setMode }) {
 
         {/* PASSWORD */}
         <div>
-          <label className="block text-sm mb-1">
+          <label className="block text-sm mb-1 text-[#1C2120]">
             Password
           </label>
 
@@ -262,7 +262,7 @@ export default function SignIn({ setMode }) {
       </form>
 
       {/* LINKS */}
-      <div className="text-center mt-6 text-sm space-y-2">
+      <div className="text-center mt-6 text-sm space-y-2 text-[#1C2120]">
         <button
           onClick={() =>
             setMode("signup")
@@ -276,7 +276,7 @@ export default function SignIn({ setMode }) {
           onClick={() =>
             setMode("forgot")
           }
-          className="underline block mx-auto"
+          className="underline block mx-auto text-[#1C2120]"
         >
           Forgotten your password?
         </button>
@@ -284,3 +284,5 @@ export default function SignIn({ setMode }) {
     </div>
   );
 }
+
+

@@ -1,6 +1,6 @@
 // =======================================================
 // src/features/shop/shop.jsx
-// UPDATED FINAL SHOP PAGE (All Swagger Fields Supported)
+// FINAL CLEAN SHOP PAGE
 // =======================================================
 
 import React, {
@@ -41,11 +41,11 @@ function ShopPage() {
   const dropdownRef =
     useRef(null);
 
-  // ======================================
-  // CLOSE DROPDOWN
-  // ======================================
+  // =====================================
+  // CLOSE SORT
+  // =====================================
   useEffect(() => {
-    const handleClick = (e) => {
+    const close = (e) => {
       if (
         dropdownRef.current &&
         !dropdownRef.current.contains(
@@ -58,19 +58,19 @@ function ShopPage() {
 
     document.addEventListener(
       "mousedown",
-      handleClick
+      close
     );
 
     return () =>
       document.removeEventListener(
         "mousedown",
-        handleClick
+        close
       );
   }, []);
 
-  // ======================================
+  // =====================================
   // FETCH PRODUCTS
-  // ======================================
+  // =====================================
   const fetchProducts =
     async () => {
       try {
@@ -88,11 +88,8 @@ function ShopPage() {
         setFilteredProducts(
           safe
         );
-      } catch (error) {
-        console.log(
-          "Fetch Error:",
-          error
-        );
+      } catch (err) {
+        console.log(err);
       } finally {
         setLoading(false);
       }
@@ -102,15 +99,14 @@ function ShopPage() {
     fetchProducts();
   }, []);
 
-  // ======================================
+  // =====================================
   // FILTER + SEARCH + SORT
-  // ======================================
+  // =====================================
   useEffect(() => {
     let result = [
       ...products,
     ];
 
-    // Category
     if (
       activeFilter !== "All"
     ) {
@@ -122,7 +118,6 @@ function ShopPage() {
         );
     }
 
-    // Search
     if (
       search.trim()
     ) {
@@ -137,7 +132,6 @@ function ShopPage() {
         );
     }
 
-    // Sort Price
     if (
       sortBy ===
       "low-high"
@@ -168,24 +162,6 @@ function ShopPage() {
       );
     }
 
-    // Rating
-    if (
-      sortBy ===
-      "rating"
-    ) {
-      result.sort(
-        (a, b) =>
-          Number(
-            b.averageRating ||
-              0
-          ) -
-          Number(
-            a.averageRating ||
-              0
-          )
-      );
-    }
-
     setFilteredProducts(
       result
     );
@@ -196,9 +172,7 @@ function ShopPage() {
     sortBy,
   ]);
 
-  // ======================================
-  // STATS
-  // ======================================
+  // =====================================
   const totalProducts =
     filteredProducts.length;
 
@@ -231,13 +205,13 @@ function ShopPage() {
       filteredProducts,
     ]);
 
-  // ======================================
+  // =====================================
   return (
     <div className="bg-[#F2F0EF] min-h-screen pt-32">
 
       {/* HERO */}
       <section className="max-w-7xl mx-auto px-6 pb-20">
-        <p className="text-xs uppercase tracking-[0.35em] text-black/50 mb-4">
+        <p className="text-xs uppercase tracking-[0.35em] text-[#1C2120]/50 mb-4">
           Bivela House
         </p>
 
@@ -251,7 +225,7 @@ function ShopPage() {
           The Collection
         </h1>
 
-        <p className="mt-8 max-w-2xl text-black/70 leading-8">
+        <p className="mt-8 max-w-2xl text-[#1C2120]/70 leading-8">
           Discover heirloom shawls shaped through heritage,
           craftsmanship and timeless luxury.
         </p>
@@ -261,7 +235,7 @@ function ShopPage() {
       <section className="max-w-7xl mx-auto px-6 pb-10">
         <div className="grid md:grid-cols-3 gap-4">
 
-          {/* Search */}
+          {/* SEARCH */}
           <input
             type="text"
             placeholder="Search Collection..."
@@ -271,10 +245,10 @@ function ShopPage() {
                 e.target.value
               )
             }
-            className="border border-black/15 bg-white px-4 py-3 outline-none focus:border-black"
+            className="border border-[#1C2120]/15 bg-white px-4 py-3 outline-none focus:border-[#1C2120]"
           />
 
-          {/* Sort */}
+          {/* SORT */}
           <div
             ref={
               dropdownRef
@@ -287,7 +261,7 @@ function ShopPage() {
                   !open
                 )
               }
-              className="w-full flex justify-between items-center border border-black/15 bg-white px-4 py-3 hover:bg-black hover:text-white transition"
+              className="w-full flex justify-between items-center border border-[#1C2120]/15 bg-white px-4 py-3 hover:bg-black hover:text-white transition"
             >
               <span>
                 {sortBy ===
@@ -301,10 +275,6 @@ function ShopPage() {
                 {sortBy ===
                   "high-low" &&
                   "Price: High to Low"}
-
-                {sortBy ===
-                  "rating" &&
-                  "Highest Rated"}
               </span>
 
               <span>
@@ -313,7 +283,7 @@ function ShopPage() {
             </button>
 
             {open && (
-              <div className="absolute mt-2 w-full bg-white border border-black z-50">
+              <div className="absolute mt-2 w-full bg-white border border-[#1C2120] z-50">
                 {[
                   {
                     label:
@@ -333,12 +303,6 @@ function ShopPage() {
                     value:
                       "high-low",
                   },
-                  {
-                    label:
-                      "Highest Rated",
-                    value:
-                      "rating",
-                  },
                 ].map(
                   (
                     opt
@@ -355,7 +319,7 @@ function ShopPage() {
                           false
                         );
                       }}
-                      className="w-full text-left px-4 py-3 hover:bg-black hover:text-white transition"
+                      className="w-full text-left px-4 py-3 hover:bg-[#1C2120] hover:text-white"
                     >
                       {
                         opt.label
@@ -367,8 +331,8 @@ function ShopPage() {
             )}
           </div>
 
-          {/* Stats */}
-          <div className="border border-black/15 bg-white px-4 py-3 flex justify-between text-sm">
+          {/* STATS */}
+          <div className="border border-black/15 bg-white px-4 py-3 flex justify-between ">
             <span>
               {
                 totalProducts
@@ -386,7 +350,7 @@ function ShopPage() {
 
       {/* FILTER */}
       <section className="max-w-7xl mx-auto px-6 pb-16">
-        <div className="flex gap-4 flex-wrap border-y border-black/10 py-6">
+        <div className="flex gap-4 flex-wrap border-y border-[#1C2120]/10 py-6">
           {[
             "All",
             "Shawls",
@@ -407,8 +371,8 @@ function ShopPage() {
                 className={`px-5 py-3 text-xs uppercase tracking-[0.30em] border transition ${
                   activeFilter ===
                   item
-                    ? "bg-black text-white border-black"
-                    : "bg-white border-black/10 hover:bg-black hover:text-white"
+                    ? "bg-[#1C2120] text-white border-black"
+                    : "bg-white border-[#1C2120]/10 hover:bg-[#1C2120] hover:text-white"
                 }`}
               >
                 {item}
@@ -419,7 +383,7 @@ function ShopPage() {
       </section>
 
       {/* PRODUCTS */}
-      <section className="max-w-7xl mx-auto px-6 pb-24 grid md:grid-cols-2 lg:grid-cols-3 gap-12">
+      <section className="max-w-7xl mx-auto px-6 pb-24 grid md:grid-cols-2 lg:grid-cols-3 gap-10">
 
         {loading ? (
           <p>
@@ -447,26 +411,12 @@ function ShopPage() {
                 item.images?.[0]
                   ?.imageUrl;
 
-              const totalStock =
-                item.variants?.reduce(
-                  (
-                    sum,
-                    v
-                  ) =>
-                    sum +
-                    Number(
-                      v.stock ||
-                        0
-                    ),
-                  0
-                ) || 0;
-
               return (
                 <div
                   key={
                     item.id
                   }
-                  className="bg-white p-4 shadow-sm hover:shadow-xl transition"
+                  className="bg-white p-4 border border-black/8 hover:shadow-xl transition"
                 >
                   <ProductCard
                     id={
@@ -479,103 +429,14 @@ function ShopPage() {
                       item.name
                     }
                     description={
-                      item.description
-                    }
-                  />
-
-                  <div className="mt-4 space-y-2">
-
-                    {/* Top */}
-                    <div className="flex justify-between">
-                      <p className="text-xs uppercase tracking-[0.25em] text-black/55">
-                        {
-                          item.categoryName
-                        }
-                      </p>
-
-                      <p className="font-medium">
+                      <span className="text-lg font-bold text-[#1C2120]">
                         ₹
                         {
                           item.basePrice
                         }
-                      </p>
-                    </div>
-
-                    {/* Desc */}
-                    <p className="text-sm text-black/70 line-clamp-2">
-                      {
-                        item.description
-                      }
-                    </p>
-
-                    {/* Variants */}
-                    <p className="text-sm text-black/60">
-                      Sizes:{" "}
-                      {item.variants
-                        ?.map(
-                          (
-                            v
-                          ) =>
-                            v.size
-                        )
-                        .join(
-                          ", "
-                        ) ||
-                        "N/A"}
-                    </p>
-
-                    <p className="text-sm text-black/60">
-                      Colors:{" "}
-                      {item.variants
-                        ?.map(
-                          (
-                            v
-                          ) =>
-                            v.color
-                        )
-                        .join(
-                          ", "
-                        ) ||
-                        "N/A"}
-                    </p>
-
-                    {/* Stock */}
-                    <p className="text-sm">
-                      Stock:{" "}
-                      <span
-                        className={
-                          totalStock >
-                          0
-                            ? "text-green-600"
-                            : "text-red-600"
-                        }
-                      >
-                        {totalStock >
-                        0
-                          ? `${totalStock} Available`
-                          : "Out of Stock"}
                       </span>
-                    </p>
-
-                    {/* Rating */}
-                    <p className="text-sm text-yellow-600">
-                      ⭐{" "}
-                      {item.averageRating ||
-                        0}{" "}
-                      (
-                      {item.totalReviews ||
-                        0}
-                      )
-                    </p>
-
-                    {/* CTA */}
-                    <NavLink
-                      to={`/product/${item.id}`}
-                      className="block text-center mt-4 border border-black px-4 py-3 text-xs uppercase tracking-[0.25em] hover:bg-black hover:text-white transition"
-                    >
-                      Explore
-                    </NavLink>
-                  </div>
+                    }
+                  />
                 </div>
               );
             }
@@ -583,7 +444,7 @@ function ShopPage() {
         )}
       </section>
 
-      {/* BOTTOM CTA */}
+      {/* CTA */}
       <section className="border-t border-black/10">
         <div className="max-w-7xl mx-auto px-6 py-24 text-center">
 

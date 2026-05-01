@@ -9,9 +9,9 @@ const BASE_URL = "https://rocket-cuddle-goatskin.ngrok-free.dev/api";
 
 const api = axios.create({
   baseURL: BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  // headers: {
+  //   "Content-Type": "application/json",
+  // },
 });
 
 // 🔐 Attach Token
